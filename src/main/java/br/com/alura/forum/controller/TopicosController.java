@@ -3,15 +3,17 @@ package br.com.alura.forum.controller;
 import java.net.URI;
 import java.util.Optional;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +43,7 @@ public class TopicosController {
 	private CursoRepository cursoRepository;
 
     @GetMapping
+    @Cacheable(value = "listaDeTopicos")
     public Page<TopicoDTO> findAll(@RequestParam(required = false) String nomeCurso,
     		@PageableDefault(sort="id", direction=Direction.DESC, page=0, size=10) Pageable paginacao) {
     	
@@ -55,6 +58,8 @@ public class TopicosController {
     }
     
     @PostMapping
+    @Transactional
+    @CacheEvict(value = "listaDeTopicos", allEntries = true)
     public ResponseEntity<TopicoDTO> create(@RequestBody @Valid TopicoForm form,
     		UriComponentsBuilder uriBuilder) {
     	
@@ -77,6 +82,7 @@ public class TopicosController {
 
     @PutMapping("/{id}")
     @Transactional
+    @CacheEvict(value = "listaDeTopicos", allEntries = true)
     public ResponseEntity<TopicoDTO> update(@PathVariable Long id, @RequestBody @Valid UpdatedTopicoForm form) {
     	Optional<Topico> optional = topicoRepository.findById(id);    	
     	
@@ -89,7 +95,8 @@ public class TopicosController {
     
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<?> remover(@PathVariable Long id) {
+    @CacheEvict(value = "listaDeTopicos", allEntries = true)
+    public ResponseEntity<?> remove(@PathVariable Long id) {
     	Optional<Topico> optional = topicoRepository.findById(id);
     	if(optional.isPresent()) {
 	    	topicoRepository.deleteById(id);
