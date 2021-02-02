@@ -38,6 +38,15 @@ public class Curso {
 			return false;
 		return true;
 	}
+	
+	public Curso() {
+		
+	}
+
+	public Curso(String nome, String categoria) {
+		this.nome = nome;
+		this.categoria = categoria;
+	}
 
 	public Long getId() {
 		return id;
